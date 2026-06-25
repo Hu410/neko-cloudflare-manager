@@ -19,7 +19,7 @@
 
 深色主题 + 紫粉渐变 + 毛玻璃效果，二次元 Neko 风格 🐱
 
-| ![](/src/img/ScreenShot_Home.png) | ![](/src/img/ScreenShot_DNS.png) |
+| ![](/src/img/ScreenShot_Home.png) | ![](/src/img/ScreenShot_Dns.png) |
 |-----------------------|-----------------------|
 | ![](/src/img/ScreenShot_wk.png) | ![](/src/img/ScreenShot_D1_SQL.png) |
 
