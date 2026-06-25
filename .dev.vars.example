@@ -1,0 +1,6 @@
+# Cloudflare API 认证
+CF_API_KEY=your_global_api_key_here
+CF_API_EMAIL=your_email@example.com
+
+# 访问密码（可选，配置后需输入密码才能访问）
+ACCESS_PASSWORD=

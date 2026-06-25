@@ -1,0 +1,26 @@
+{
+  "name": "nekocloud",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "NekoCloud - Cloudflare 管理面板 (CF Workers/Pages + Vercel 跨平台部署)",
+  "scripts": {
+    "build:ui": "tsx src/build-ui.ts",
+    "dev": "npm run build:ui && wrangler dev",
+    "dev:node": "npm run build:ui && tsx src/serve-node.ts",
+    "deploy:workers": "npm run build:ui && wrangler deploy",
+    "deploy:pages": "npm run build:ui && wrangler pages deploy dist --project-name=nekocloud",
+    "deploy:vercel": "vercel --prod",
+    "build": "npm run build:ui && tsc"
+  },
+  "dependencies": {
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250620.0",
+    "@hono/node-server": "^1.14.3",
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.23.0"
+  }
+}

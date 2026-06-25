@@ -1,0 +1,9 @@
+name = "nekocloud"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+CF_API_KEY = ""
+CF_API_EMAIL = ""
+ACCESS_PASSWORD = ""
