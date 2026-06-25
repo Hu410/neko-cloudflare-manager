@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NekoCloud Manager ☁️🐱</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==================== Reset & Variables ==================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-dark:#0b0d17;--bg-card:rgba(17,19,31,0.85);--bg-card-hover:rgba(25,28,50,0.9);--bg-input:rgba(22,25,45,0.8);
+  --border:rgba(139,92,246,0.15);--border-light:rgba(139,92,246,0.3);
+  --text:#d4d8f0;--text-dim:#8890b5;--text-bright:#f0f1f7;
+  --pink:#f472b6;--pink-dark:#ec4899;--pink-glow:rgba(244,114,182,0.2);
+  --purple:#a78bfa;--purple-dark:#8b5cf6;--purple-glow:rgba(139,92,246,0.25);
+  --cyan:#67e8f9;--cyan-dark:#22d3ee;
+  --green:#4ade80;--red:#f87171;--yellow:#facc15;
+  --gradient-main:linear-gradient(135deg,#8b5cf6 0%,#ec4899 50%,#22d3ee 100%);
+  --gradient-card:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.05));
+  --sidebar-w:250px;--header-h:58px;
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+  --shadow:0 8px 32px rgba(0,0,0,0.4);--shadow-glow:0 0 30px rgba(139,92,246,0.15);
+  --font:'Noto Sans SC',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --glass:blur(16px) saturate(1.2);
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg-dark);color:var(--text);font-size:14px;line-height:1.6}
+a{color:var(--cyan);text-decoration:none;transition:color .2s}a:hover{color:var(--pink)}
+button{font-family:var(--font);cursor:pointer;border:none;font-size:13px}
+input,textarea,select{font-family:var(--font);font-size:13px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:8px 12px;outline:none;transition:all .25s;backdrop-filter:var(--glass)}
+input:focus,textarea:focus,select:focus{border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-glow)}
+textarea{resize:vertical;min-height:80px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 14px;font-weight:600;font-size:11px;text-transform:uppercase;color:var(--purple);border-bottom:1px solid var(--border);letter-spacing:.8px}
+td{padding:11px 14px;border-bottom:1px solid rgba(139,92,246,0.06)}
+tr{transition:background .2s}
+tr:hover td{background:rgba(139,92,246,0.04)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;backdrop-filter:var(--glass)}
+.badge-active,.badge-success{background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.2)}
+.badge-pending{background:rgba(250,204,21,0.12);color:var(--yellow);border:1px solid rgba(250,204,21,0.2)}
+.badge-error,.badge-failed{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.badge-info{background:rgba(103,232,249,0.12);color:var(--cyan);border:1px solid rgba(103,232,249,0.2)}
+.badge-purple{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
+
+/* ==================== Scrollbar ==================== */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(139,92,246,0.5)}
+
+/* ==================== Buttons ==================== */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--radius-sm);font-weight:500;transition:all .25s;position:relative;overflow:hidden}
+.btn::before{content:'';position:absolute;inset:0;background:var(--gradient-main);opacity:0;transition:opacity .3s}
+.btn-primary{background:var(--gradient-main);color:#fff;box-shadow:0 4px 15px rgba(139,92,246,0.3)}
+.btn-primary:hover{box-shadow:0 6px 25px rgba(139,92,246,0.5);transform:translateY(-1px)}
+.btn-secondary{background:var(--bg-input);color:var(--text);border:1px solid var(--border);backdrop-filter:var(--glass)}
+.btn-secondary:hover{border-color:var(--purple);color:var(--purple);box-shadow:0 0 15px var(--purple-glow)}
+.btn-danger{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.btn-danger:hover{background:rgba(248,113,113,0.2);box-shadow:0 0 15px rgba(248,113,113,0.15)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-icon{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);background:transparent;color:var(--text-dim);transition:all .2s}
+.btn-icon:hover{color:var(--pink);background:var(--pink-glow);transform:scale(1.1)}
+
+/* ==================== Analytics ==================== */
+.analytics-tabs{display:flex;gap:6px;margin-bottom:20px}
+.analytics-tabs .tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg-input);color:var(--text-dim);border:1px solid var(--border);transition:all .2s}
+.analytics-tabs .tab.active{background:var(--gradient-main);color:#fff;border-color:transparent;box-shadow:0 2px 10px var(--purple-glow)}
+.analytics-tabs .tab:hover:not(.active){border-color:var(--purple);color:var(--text)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--bg-card);backdrop-filter:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-main);opacity:.5}
+.kpi-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:var(--shadow-glow)}
+.kpi-card .kpi-icon{font-size:22px;margin-bottom:6px}
+.kpi-card .kpi-val{font-size:26px;font-weight:700;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.kpi-card .kpi-label{font-size:11px;text-transform:uppercase;color:var(--text-dim);letter-spacing:.5px;margin-top:2px}
+
+/* ==================== Button Press Effect ==================== */
+.btn:active{transform:scale(0.96);transition:transform .08s ease}
+.btn-icon:active{transform:scale(0.9);transition:transform .08s ease}
+
+/* ==================== Loading Overlay ==================== */
+.loading-overlay{position:fixed;inset:0;background:rgba(5,7,15,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(6px);animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.loading-box{background:rgba(17,19,31,0.95);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:32px 48px;display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 16px 64px rgba(0,0,0,0.5),0 0 40px var(--purple-glow)}
+.loading-box .neko-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--pink);border-right-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite}
+.loading-box .loading-text{font-size:14px;color:var(--text);font-weight:500}
+.loading-box .loading-sub{font-size:12px;color:var(--text-dim);margin-top:-8px}
+
+/* ==================== Layout ==================== */
+#app{display:flex;height:100vh;overflow:hidden;position:relative}
+
+/* ===== 背景装饰 ===== */
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 50%,rgba(139,92,246,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(236,72,153,0.04) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(34,211,238,0.03) 0%,transparent 50%);pointer-events:none;z-index:0;animation:bgFloat 20s ease-in-out infinite}
+@keyframes bgFloat{0%,100%{transform:translate(0,0) rotate(0deg)}33%{transform:translate(2%,-1%) rotate(1deg)}66%{transform:translate(-1%,2%) rotate(-1deg)}}
+
+/* ===== 侧边栏 ===== */
+.sidebar{width:var(--sidebar-w);background:rgba(11,13,23,0.92);backdrop-filter:var(--glass);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;position:relative;z-index:10}
+.sidebar::before{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(to bottom,var(--purple),transparent 30%,transparent 70%,var(--pink));opacity:.3}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:relative}
+.sidebar-header .logo{width:38px;height:38px;background:var(--gradient-main);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 4px 15px rgba(139,92,246,0.35);position:relative}
+.sidebar-header .logo::after{content:'🐱';position:absolute;bottom:-4px;right:-4px;font-size:14px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
+.sidebar-header h1{font-size:16px;font-weight:700;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sidebar-header .sub{font-size:10px;color:var(--text-dim);letter-spacing:.5px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0}
+.nav-section{padding:10px 22px 6px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--purple);letter-spacing:1.5px;margin-top:10px;opacity:.7}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 22px;color:var(--text-dim);cursor:pointer;transition:all .2s;border-left:3px solid transparent;font-size:13px;margin:2px 0;position:relative}
+.nav-item:hover{color:var(--text);background:rgba(139,92,246,0.06);border-left-color:rgba(139,92,246,0.3)}
+.nav-item.active{color:var(--pink);background:linear-gradient(90deg,rgba(244,114,182,0.08),transparent);border-left-color:var(--pink)}
+.nav-item.active::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--pink);border-radius:0 2px 2px 0;box-shadow:0 0 10px var(--pink-glow)}
+.nav-item .icon{width:20px;text-align:center;font-size:15px}
+
+/* ===== 主区域 ===== */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:1}
+.header{height:var(--header-h);background:rgba(11,13,23,0.8);backdrop-filter:var(--glass);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.header-title{font-size:17px;font-weight:700;color:var(--text-bright);display:flex;align-items:center;gap:8px}
+.header-title::before{content:'⟡';color:var(--pink);font-size:14px}
+.header-actions{display:flex;align-items:center;gap:12px}
+.zone-select{background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;min-width:200px;backdrop-filter:var(--glass)}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* ==================== Cards ==================== */
+.card{background:var(--bg-card);backdrop-filter:var(--glass);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s}
+.card:hover{border-color:var(--border-light);box-shadow:var(--shadow-glow)}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--gradient-card)}
+.card-header h3{font-size:14px;font-weight:600;color:var(--text-bright)}
+.card-body{padding:20px}
+.card-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* ==================== Stats ==================== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg-card);backdrop-filter:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .3s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-main);opacity:.5;transition:opacity .3s}
+.stat-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:var(--shadow-glow)}
+.stat-card:hover::before{opacity:1}
+.stat-card .label{font-size:11px;text-transform:uppercase;color:var(--text-dim);letter-spacing:.8px;font-weight:600}
+.stat-card .value{font-size:28px;font-weight:700;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:4px}
+.stat-card .sub{font-size:12px;color:var(--text-dim);margin-top:2px}
+
+/* ==================== Forms ==================== */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:11px;font-weight:600;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+.form-group input,.form-group select,.form-group textarea{width:100%}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-inline{display:flex;gap:8px;align-items:flex-end}
+.form-inline .form-group{margin-bottom:0;flex:1}
+
+/* ==================== Modals ==================== */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,7,15,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
+.modal{background:rgba(17,19,31,0.95);backdrop-filter:var(--glass);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:90%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 16px 64px rgba(0,0,0,0.5),0 0 40px var(--purple-glow);animation:modalIn .3s ease}
+@keyframes modalIn{from{transform:scale(0.95) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--gradient-card)}
+.modal-header h3{font-size:16px;font-weight:700;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* ==================== Toast ==================== */
+.toast-container{position:fixed;top:16px;right:16px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;animation:slideIn .3s ease;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);backdrop-filter:var(--glass)}
+.toast-success{background:rgba(6,95,70,0.9);color:#6ee7b7;border:1px solid rgba(16,185,129,0.4)}
+.toast-error{background:rgba(127,29,29,0.9);color:#fca5a5;border:1px solid rgba(239,68,68,0.4)}
+.toast-info{background:rgba(30,58,95,0.9);color:#93c5fd;border:1px solid rgba(59,130,246,0.4)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ==================== Loading & Empty ==================== */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text-dim)}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--pink);border-right-color:var(--purple);border-radius:50%;animation:spin .6s linear infinite;margin-right:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty .icon{font-size:48px;margin-bottom:12px;opacity:.4}
+.empty p{font-size:14px}
+
+/* ==================== SQL Console ==================== */
+.sql-editor{font-family:'Fira Code','Cascadia Code',Consolas,monospace;background:rgba(10,12,22,0.9);border:1px solid var(--border);color:#c9d1d9;padding:14px;border-radius:var(--radius-sm);width:100%;min-height:100px;resize:vertical;font-size:13px;line-height:1.6;tab-size:2}
+.sql-result{margin-top:16px;overflow-x:auto}
+.sql-result table{font-size:12px}
+.sql-result th{background:rgba(139,92,246,0.1);color:var(--purple);position:sticky;top:0}
+.sql-result td{font-family:'Fira Code',Consolas,monospace;font-size:12px;white-space:pre-wrap;max-width:300px;word-break:break-all}
+
+/* ==================== Auth Screen ==================== */
+.auth-screen{display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;background:var(--bg-dark);position:relative;overflow:hidden}
+.auth-screen::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.12),transparent 70%);top:-200px;right:-100px;animation:pulse 6s ease-in-out infinite}
+.auth-screen::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,0.08),transparent 70%);bottom:-200px;left:-100px;animation:pulse 8s ease-in-out infinite reverse}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.1);opacity:1}}
+.auth-card{background:rgba(17,19,31,0.9);backdrop-filter:var(--glass);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:44px;width:440px;box-shadow:0 16px 64px rgba(0,0,0,0.4),0 0 60px var(--purple-glow);position:relative;z-index:1;animation:modalIn .4s ease}
+.auth-card .logo-big{text-align:center;margin-bottom:28px}
+.auth-card .logo-big .icon{width:64px;height:64px;background:var(--gradient-main);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;box-shadow:0 8px 30px rgba(139,92,246,0.4);position:relative}
+.auth-card .logo-big .icon::after{content:'🐾';position:absolute;bottom:-6px;right:-8px;font-size:18px}
+.auth-card .logo-big h2{font-size:22px;margin-top:16px;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700}
+.auth-card .logo-big p{font-size:13px;color:var(--text-dim);margin-top:6px}
+.auth-card .form-group input:focus{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink-glow)}
+
+/* ==================== Responsive ==================== */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-100%;z-index:100;height:100%;transition:left .3s}
+  .sidebar.open{left:0}
+  .form-row{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast-container" class="toast-container"></div>
+
+<script>
+// ==================== State ====================
+const state = {
+  accountId: localStorage.getItem('cf_account_id') || '',
+  accountName: localStorage.getItem('cf_account_name') || '',
+  zones: [],
+  currentZoneId: localStorage.getItem('cf_zone_id') || '',
+  currentZoneName: localStorage.getItem('cf_zone_name') || '',
+  currentSection: 'dashboard',
+  user: null,
+  accounts: [],
+  data: {},
+  serverConfig: null,
+  passwordVerified: localStorage.getItem('cf_pwd_verified') === 'true',
+};
+
+// ==================== Loading Overlay ====================
+function showLoading(msg, sub) {
+  if (document.querySelector('.loading-overlay')) return;
+  const el = document.createElement('div');
+  el.className = 'loading-overlay';
+  el.innerHTML = `<div class="loading-box">
+    <div class="neko-spinner"></div>
+    <div class="loading-text">${msg || '处理中...'}</div>
+    ${sub ? `<div class="loading-sub">${sub}</div>` : ''}
+  </div>`;
+  document.body.appendChild(el);
+}
+function hideLoading() {
+  document.querySelector('.loading-overlay')?.remove();
+}
+
+// ==================== Button Loading Helper ====================
+function btnLoading(btn, asyncFn, msg) {
+  if (!btn || btn._loading) return;
+  btn._loading = true;
+  showLoading(msg || '处理中...');
+  Promise.resolve().then(asyncFn).finally(() => {
+    btn._loading = false;
+    hideLoading();
+  });
+}
+
+// ==================== API Client ====================
+async function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (options.body instanceof FormData) delete headers['Content-Type'];
+  const resp = await fetch(`/api${path}`, { ...options, headers });
+  const data = await resp.json();
+  if (!data.success && data.error) throw new Error(data.error);
+  return data;
+}
+
+// ==================== Toast ====================
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'} ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ==================== Modal ====================
+function showModal(title, bodyHtml, onConfirm, confirmText, size) {
+  if (!confirmText) confirmText = '确认';
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const modalW = size === 'lg' ? '900px' : size === 'md' ? '720px' : '560px';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:${modalW}">
+      <div class="modal-header"><h3>${title}</h3><button class="btn-icon" onclick="this.closest('.modal-overlay').remove()">✕</button></div>
+      <div class="modal-body">${bodyHtml}</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">取消</button>
+        <button class="btn btn-primary" id="modal-confirm">${confirmText}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const confirmBtn = overlay.querySelector('#modal-confirm');
+  confirmBtn.onclick = () => {
+    btnLoading(confirmBtn, () => onConfirm(overlay));
+  };
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+function confirmAction(title, msg, onConfirm) {
+  showModal(title, `<p style="color:var(--text-dim)">${msg}</p>`, async (overlay) => {
+    try { await onConfirm(); overlay.remove(); toast('操作成功', 'success'); render(); }
+    catch (e) { toast(e.message, 'error'); }
+  }, '确认执行');
+}
+
+// ==================== Render Engine ====================
+function render() {
+  // 需要密码验证但未通过 → 显示密码页
+  if (state.serverConfig?.needPassword && !state.passwordVerified) {
+    renderPasswordAuth();
+    return;
+  }
+  renderApp();
+}
+
+function renderPasswordAuth() {
+  document.getElementById('app').innerHTML = `
+    <div class="auth-screen">
+      <div class="auth-card">
+        <div class="logo-big">
+          <div class="icon">☁️</div>
+          <h2>NekoCloud Manager</h2>
+          <p>🔒 访问需要密码验证</p>
+        </div>
+        <div class="form-group">
+          <label>🔑 访问密码</label>
+          <input type="password" id="access-password" placeholder="请输入访问密码" onkeydown="if(event.key==='Enter')doPasswordLogin()">
+        </div>
+        <div id="auth-error" style="color:var(--red);font-size:13px;margin-bottom:12px;display:none"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:14px" onclick="doPasswordLogin()">🐾 验证</button>
+      </div>
+    </div>`;
+}
+
+async function doPasswordLogin() {
+  const pwd = document.getElementById('access-password').value.trim();
+  if (!pwd) return;
+  const errEl = document.getElementById('auth-error');
+  try {
+    const resp = await fetch('/api/server/verify-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd }),
+    });
+    const data = await resp.json();
+    if (data.success) {
+      state.passwordVerified = true;
+      localStorage.setItem('cf_pwd_verified', 'true');
+      // 密码验证通过后，加载账号和 Zone 数据
+      try {
+        const r = await api('/auth/verify');
+        state.user = r.result;
+        await loadAccounts();
+        await loadZones();
+        if (!state.currentZoneId && state.zones.length) {
+          state.currentZoneId = state.zones[0].id;
+          state.currentZoneName = state.zones[0].name;
+          localStorage.setItem('cf_zone_id', state.currentZoneId);
+          localStorage.setItem('cf_zone_name', state.currentZoneName);
+        }
+      } catch {}
+      render();
+    } else {
+      errEl.textContent = data.error || '密码错误'; errEl.style.display = 'block';
+    }
+  } catch (e) {
+    errEl.textContent = '验证失败: ' + e.message; errEl.style.display = 'block';
+  }
+}
+
+async function loadAccounts() {
+  try {
+    const resp = await api('/accounts');
+    state.accounts = resp.result || [];
+    if (state.accounts.length && !state.accountId) {
+      state.accountId = state.accounts[0].id;
+      state.accountName = state.accounts[0].name;
+      localStorage.setItem('cf_account_id', state.accountId);
+      localStorage.setItem('cf_account_name', state.accountName);
+    }
+  } catch (e) { console.error('Failed to load accounts:', e); }
+}
+
+async function loadZones() {
+  try {
+    const resp = await api('/zones?per_page=50');
+    state.zones = resp.result || [];
+  } catch (e) { console.error('Failed to load zones:', e); }
+}
+
+// ==================== Main App ====================
+function renderApp() {
+  const sections = [
+    { id: 'dashboard', icon: '🏠', label: '仪表盘' },
+    { id: 'dns', icon: '🌐', label: 'DNS 管理' },
+    { id: 'workers', icon: '⚡', label: 'Workers' },
+    { id: 'pages', icon: '📄', label: 'Pages' },
+    { id: 'r2', icon: '📦', label: 'R2 存储' },
+    { id: 'kv', icon: '🔑', label: 'KV 存储' },
+    { id: 'd1', icon: '🗃️', label: 'D1 数据库' },
+    { id: 'databases', icon: '🐘', label: '数据库 (PG/MySQL)' },
+  ];
+  document.getElementById('app').innerHTML = `
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">☁️</div>
+        <div><h1>NekoCloud</h1><div class="sub">${state.accountName || '未选择账号'}</div></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">功能菜单</div>
+        ${sections.map(s => `
+          <div class="nav-item ${state.currentSection === s.id ? 'active' : ''}" onclick="switchSection('${s.id}')">
+            <span class="icon">${s.icon}</span> ${s.label}
+          </div>`).join('')}
+        <div class="nav-section">账号</div>
+        <div class="nav-item" onclick="showAccountPicker()">
+          <span class="icon">🔄</span> 切换账号
+        </div>
+        <div class="nav-item" onclick="doLogout()">
+          <span class="icon">🚪</span> 退出登录
+        </div>
+      </nav>
+    </div>
+    <div class="main">
+      <div class="header">
+        <div class="header-title">${sections.find(s => s.id === state.currentSection)?.label || '仪表盘'}</div>
+        <div class="header-actions">
+          ${['dashboard','dns'].includes(state.currentSection) ? `
+            <select class="zone-select" id="zone-selector" onchange="changeZone(this.value)">
+              <option value="">选择域名 (Zone)</option>
+              ${state.zones.map(z => `<option value="${z.id}" ${z.id === state.currentZoneId ? 'selected' : ''}>${z.name}</option>`).join('')}
+            </select>` : ''}
+          <span style="font-size:12px;color:var(--text-dim)">👤 ${state.user?.email || '已连接'}</span>
+        </div>
+      </div>
+      <div class="content" id="content-area"></div>
+    </div>`;
+  loadSectionData();
+}
+
+function switchSection(id) {
+  state.currentSection = id;
+  render();
+}
+
+function changeZone(zoneId) {
+  const zone = state.zones.find(z => z.id === zoneId);
+  state.currentZoneId = zoneId;
+  state.currentZoneName = zone?.name || '';
+  localStorage.setItem('cf_zone_id', zoneId);
+  localStorage.setItem('cf_zone_name', state.currentZoneName);
+  loadSectionData();
+}
+
+function doLogout() {
+  localStorage.removeItem('cf_pwd_verified');
+  localStorage.removeItem('cf_account_id');
+  state.passwordVerified = false;
+  state.user = null;
+  render();
+}
+
+async function showAccountPicker() {
+  await loadAccounts();
+  const html = `<div class="form-group"><label>选择账号</label>
+    <select id="pick-account">${state.accounts.map(a => `<option value="${a.id}" data-name="${a.name}" ${a.id === state.accountId ? 'selected' : ''}>${a.name} (${a.id})</option>`).join('')}</select></div>`;
+  showModal('切换账号', html, (overlay) => {
+    const sel = overlay.querySelector('#pick-account');
+    state.accountId = sel.value;
+    state.accountName = sel.options[sel.selectedIndex].dataset.name;
+    localStorage.setItem('cf_account_id', state.accountId);
+    localStorage.setItem('cf_account_name', state.accountName);
+    overlay.remove();
+    toast('已切换到 ' + state.accountName, 'success');
+    render();
+  });
+}
+
+// ==================== Section Data Loaders ====================
+async function loadSectionData() {
+  const area = document.getElementById('content-area');
+  if (!area) return;
+  area.innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
+  try {
+    switch (state.currentSection) {
+      case 'dashboard': await renderDashboard(area); break;
+      case 'dns': await renderDNS(area); break;
+      case 'workers': await renderWorkers(area); break;
+      case 'pages': await renderPages(area); break;
+      case 'r2': await renderR2(area); break;
+      case 'kv': await renderKV(area); break;
+      case 'd1': await renderD1(area); break;
+      case 'databases': await renderDatabases(area); break;
+    }
+  } catch (e) {
+    area.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>加载失败: ${e.message}</p></div>`;
+  }
+}
+
+// ==================== Dashboard ====================
+async function renderDashboard(area) {
+  const zoneCount = state.zones.length;
+  const aid = state.accountId;
+
+  // 并行获取所有资源计数
+  let workerCount = 0, pageCount = 0, bucketCount = 0, kvCount = 0, d1Count = 0;
+  if (aid) {
+    const [wr, pr, r2, kv, d1] = await Promise.allSettled([
+      api(`/workers/scripts?account_id=${aid}`),
+      api(`/pages/projects?account_id=${aid}`),
+      api(`/r2/buckets?account_id=${aid}`),
+      api(`/kv/namespaces?account_id=${aid}`),
+      api(`/d1/databases?account_id=${aid}`),
+    ]);
+    workerCount = wr.status === 'fulfilled' ? (wr.value.result?.length || 0) : 0;
+    pageCount = pr.status === 'fulfilled' ? (pr.value.result?.length || 0) : 0;
+    bucketCount = r2.status === 'fulfilled' ? (r2.value.result?.buckets?.length || 0) : 0;
+    kvCount = kv.status === 'fulfilled' ? (kv.value.result?.length || 0) : 0;
+    d1Count = d1.status === 'fulfilled' ? (d1.value.result?.length || 0) : 0;
+  }
+
+  area.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">Workers</div><div class="value">${workerCount}</div><div class="sub">已部署的脚本</div></div>
+      <div class="stat-card"><div class="label">Pages</div><div class="value">${pageCount}</div><div class="sub">Pages 项目</div></div>
+      <div class="stat-card"><div class="label">R2 Buckets</div><div class="value">${bucketCount}</div><div class="sub">对象存储</div></div>
+      <div class="stat-card"><div class="label">KV 命名空间</div><div class="value">${kvCount}</div><div class="sub">键值存储</div></div>
+      <div class="stat-card"><div class="label">D1 数据库</div><div class="value">${d1Count}</div><div class="sub">SQLite 数据库</div></div>
+    </div>
+    <div id="analytics-section"></div>
+    <div class="card" style="margin-top:24px">
+      <div class="card-header"><h3>账号信息</h3></div>
+      <div class="card-body">
+        <table>
+          <tr><td style="width:140px;color:var(--text-dim)">账号名称</td><td><strong>${state.accountName}</strong></td></tr>
+          <tr><td style="width:140px;color:var(--text-dim)">用户 ID</td><td><code style="background:var(--bg-input);padding:2px 8px;border-radius:4px">${state.accountId || '-'}</code></td></tr>
+          <tr><td style="color:var(--text-dim)">区域 ID</td><td><code style="background:var(--bg-input);padding:2px 8px;border-radius:4px">${state.currentZoneId || '-'}</code></td></tr>
+        </table>
+      </div>
+    </div>`;
+
+  // 同步 zone 选择器
+  const sel = document.getElementById('zone-selector');
+  if (sel && state.zones.length) {
+    sel.innerHTML = `<option value="">选择域名 (Zone)</option>` +
+      state.zones.map(z => `<option value="${z.id}" ${z.id === state.currentZoneId ? 'selected' : ''}>${z.name}</option>`).join('');
+  }
+
+  // 加载 Analytics
+  if (state.currentZoneId) {
+    loadDashboardAnalytics(state.currentZoneId, -1440);
+  } else if (zoneCount > 0) {
+    state.currentZoneId = state.zones[0].id;
+    state.currentZoneName = state.zones[0].name;
+    localStorage.setItem('cf_zone_id', state.currentZoneId);
+    localStorage.setItem('cf_zone_name', state.currentZoneName);
+    if (sel) sel.value = state.currentZoneId;
+    loadDashboardAnalytics(state.currentZoneId, -1440);
+  } else {
+    document.getElementById('analytics-section').innerHTML = '<div class="card" style="margin-top:16px"><div class="card-body" style="text-align:center;color:var(--text-dim);padding:30px">暂无域名，请先添加 Zone 以查看流量分析</div></div>';
+  }
+}
+
+async function switchAnalyticsRange(since, tabEl) {
+  document.querySelectorAll('.analytics-tabs .tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  if (state.currentZoneId) loadDashboardAnalytics(state.currentZoneId, since);
+}
+
+function fmtNum(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(2)+'B';
+  if (n >= 1e6) return (n/1e6).toFixed(2)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return String(n);
+}
+function fmtBytes(b) {
+  if (b >= 1e12) return (b/1e12).toFixed(2)+' TB';
+  if (b >= 1e9) return (b/1e9).toFixed(2)+' GB';
+  if (b >= 1e6) return (b/1e6).toFixed(2)+' MB';
+  if (b >= 1e3) return (b/1e3).toFixed(1)+' KB';
+  return b + ' B';
+}
+const countryFlags = {CN:'🇨🇳',US:'🇺🇸',JP:'🇯🇵',KR:'🇰🇷',DE:'🇩🇪',GB:'🇬🇧',FR:'🇫🇷',RU:'🇷🇺',BR:'🇧🇷',IN:'🇮🇳',CA:'🇨🇦',AU:'🇦🇺',NL:'🇳🇱',SG:'🇸🇬',TW:'🇨🇳',HK:'🇨🇳',TH:'🇹🇭',VN:'🇻🇳',ID:'🇮🇩',PH:'🇵🇭',MY:'🇲🇾',IT:'🇮🇹',ES:'🇪🇸',PL:'🇵🇱',TR:'🇹🇷',UA:'🇺🇦',AR:'🇦🇷',MX:'🇲🇽',CL:'🇨🇱',CO:'🇨🇴',SE:'🇸🇪',NO:'🇳🇴',FI:'🇫🇮',DK:'🇩🇰',CZ:'🇨🇿',RO:'🇷🇴',HU:'🇭🇺',ZA:'🇿🇦',EG:'🇪🇬',IL:'🇮🇱',SA:'🇸🇦',AE:'🇦🇪',NZ:'🇳🇿'};
+
+async function loadDashboardAnalytics(zoneId, since) {
+  const sec = document.getElementById('analytics-section');
+  if (!sec) return;
+  sec.innerHTML = `<div class="loading" style="padding:30px"><div class="spinner"></div>加载 Analytics...</div>`;
+
+  try {
+    const resp = await api(`/analytics/zones/${zoneId}/analytics?since=${since}`);
+    const r = resp.result || {};
+    const t = r.totals || {};
+    const countries = r.countries || [];
+    const sg = r.statusGroups || {};
+
+    const cacheRate = t.requests ? ((t.cachedRequests / t.requests) * 100).toFixed(1) : '0';
+
+    sec.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;margin-top:8px">
+        <h3 style="color:var(--text-bright);font-size:15px">📊 流量分析 — ${state.currentZoneName || zoneId}</h3>
+        <div class="analytics-tabs">
+          <div class="tab ${since===-1440?'active':''}" onclick="switchAnalyticsRange(-1440,this)">24 小时</div>
+          <div class="tab ${since===-10080?'active':''}" onclick="switchAnalyticsRange(-10080,this)">7 天</div>
+          <div class="tab ${since===-43200?'active':''}" onclick="switchAnalyticsRange(-43200,this)">30 天</div>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-val">${fmtNum(t.requests||0)}</div><div class="kpi-label">总请求</div></div>
+        <div class="kpi-card"><div class="kpi-icon">📡</div><div class="kpi-val">${fmtBytes(t.bytes||0)}</div><div class="kpi-label">带宽</div></div>
+        <div class="kpi-card"><div class="kpi-icon">👤</div><div class="kpi-val">${fmtNum(t.uniques||0)}</div><div class="kpi-label">唯一访客</div></div>
+        <div class="kpi-card"><div class="kpi-icon">🛡️</div><div class="kpi-val">${fmtNum(t.threats||0)}</div><div class="kpi-label">威胁拦截</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-header"><h3>📋 请求详情</h3></div>
+          <div class="card-body">
+            <table>
+              <tr><td style="color:var(--text-dim);width:140px">总请求数</td><td><strong>${fmtNum(t.requests||0)}</strong></td></tr>
+              <tr><td style="color:var(--text-dim)">缓存命中</td><td>${fmtNum(t.cachedRequests||0)} <span class="badge badge-success">${cacheRate}%</span></td></tr>
+              <tr><td style="color:var(--text-dim)">未缓存</td><td>${fmtNum((t.requests||0)-(t.cachedRequests||0))}</td></tr>
+              <tr><td style="color:var(--text-dim)">总带宽</td><td>${fmtBytes(t.bytes||0)}</td></tr>
+              <tr><td style="color:var(--text-dim)">缓存带宽</td><td>${fmtBytes(t.cachedBytes||0)}</td></tr>
+              <tr><td style="color:var(--text-dim)">页面浏览</td><td>${fmtNum(t.pageViews||0)}</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>🌐 状态码分布</h3></div>
+          <div class="card-body">
+            <table>
+              <tr><td style="color:var(--green);width:100px;font-weight:600">2xx 成功</td><td><strong>${fmtNum(sg['2xx']||0)}</strong></td></tr>
+              <tr><td style="color:var(--cyan);font-weight:600">3xx 重定向</td><td><strong>${fmtNum(sg['3xx']||0)}</strong></td></tr>
+              <tr><td style="color:var(--yellow);font-weight:600">4xx 客户端</td><td><strong>${fmtNum(sg['4xx']||0)}</strong></td></tr>
+              <tr><td style="color:var(--red);font-weight:600">5xx 服务端</td><td><strong>${fmtNum(sg['5xx']||0)}</strong></td></tr>
+              <tr><td style="color:var(--text-dim);font-weight:600">其他</td><td><strong>${fmtNum(sg.other||0)}</strong></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-header"><h3>🌍 访问来源国家/地区 (${countries.length})</h3></div>
+        <div class="card-body" style="padding:0">
+          ${countries.length === 0 ? '<div style="text-align:center;color:var(--text-dim);padding:30px">暂无数据</div>' : `
+          <table>
+            <thead><tr><th style="width:40px">#</th><th>国家/地区</th><th style="text-align:right">请求数</th><th style="text-align:right">占比</th><th style="text-align:right">威胁</th></tr></thead>
+            <tbody>
+              ${countries.slice(0, 20).map((c, i) => {
+                const pct = t.requests ? ((c.requests / t.requests) * 100).toFixed(1) : '0';
+                return `<tr>
+                  <td style="color:var(--text-dim)">${i+1}</td>
+                  <td>${c.name}</td>
+                  <td style="text-align:right"><strong>${fmtNum(c.requests)}</strong></td>
+                  <td style="text-align:right"><span class="badge badge-info">${pct}%</span></td>
+                  <td style="text-align:right;color:${c.threats>0?'var(--red)':'var(--text-dim)'}">${fmtNum(c.threats)}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>`}
+        </div>
+      </div>`;
+  } catch (e) {
+    sec.innerHTML = `<div class="card" style="margin-top:16px"><div class="card-body" style="text-align:center;color:var(--text-dim);padding:30px">⚠️ 无法加载 Analytics: ${e.message}</div></div>`;
+  }
+}
+
+// ==================== DNS ====================
+async function renderDNS(area) {
+  await loadZones();
+  if (!state.currentZoneId) {
+    area.innerHTML = `<div class="empty"><div class="icon">🌐</div><p>请先在顶部选择一个域名 (Zone)</p></div>`;
+    // Re-render zone selector
+    const sel = document.getElementById('zone-selector');
+    if (sel) sel.innerHTML = `<option value="">选择域名 (Zone)</option>${state.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')}`;
+    return;
+  }
+  const resp = await api(`/zones/${state.currentZoneId}/dns?per_page=100`);
+  const records = resp.result || [];
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">DNS 记录 — ${state.currentZoneName}</h3>
+      <button class="btn btn-primary" onclick="showCreateDNS()">+ 添加记录</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>类型</th><th>名称</th><th>内容</th><th>TTL</th><th>代理</th><th>操作</th></tr></thead>
+        <tbody>
+          ${records.length === 0 ? '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px">暂无 DNS 记录</td></tr>' :
+          records.map(r => `<tr>
+            <td><span class="badge badge-info">${r.type}</span></td>
+            <td><strong>${r.name}</strong></td>
+            <td style="max-width:300px;word-break:break-all;font-size:12px">${r.content}</td>
+            <td>${r.ttl === 1 ? '自动' : r.ttl}</td>
+            <td>${r.proxied ? '<span class="badge badge-active">已代理</span>' : '<span class="badge badge-pending">仅DNS</span>'}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>showEditDNS('${r.id}'))">编辑</button>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteDNS('${r.id}','${r.name}'))">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function showCreateDNS() {
+  const html = `
+    <div class="form-group"><label>记录类型</label>
+      <select id="dns-type"><option>A</option><option>AAAA</option><option>CNAME</option><option>MX</option><option>TXT</option><option>SRV</option><option>NS</option></select></div>
+    <div class="form-group"><label>名称</label><input id="dns-name" placeholder="例: www 或 @"></div>
+    <div class="form-group"><label>内容</label><input id="dns-content" placeholder="例: 1.2.3.4 或 example.com"></div>
+    <div class="form-row">
+      <div class="form-group"><label>TTL</label><select id="dns-ttl"><option value="1">自动</option><option value="60">60 秒</option><option value="300">5 分钟</option><option value="3600">1 小时</option><option value="86400">1 天</option></select></div>
+      <div class="form-group"><label>代理</label><select id="dns-proxied"><option value="true">开启</option><option value="false">关闭</option></select></div>
+    </div>`;
+  showModal('添加 DNS 记录', html, async (overlay) => {
+    try {
+      await api(`/zones/${state.currentZoneId}/dns`, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: overlay.querySelector('#dns-type').value,
+          name: overlay.querySelector('#dns-name').value,
+          content: overlay.querySelector('#dns-content').value,
+          ttl: parseInt(overlay.querySelector('#dns-ttl').value),
+          proxied: overlay.querySelector('#dns-proxied').value === 'true',
+        }),
+      });
+      overlay.remove(); toast('DNS 记录已创建', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+async function showEditDNS(recordId) {
+  const resp = await api(`/zones/${state.currentZoneId}/dns/${recordId}`);
+  const r = resp.result;
+  const safeContent = escapeHtml(r.content || '');
+  const safeName = escapeHtml(r.name || '');
+  const html = `
+    <div class="form-group"><label>记录类型</label><input value="${r.type}" disabled></div>
+    <div class="form-group"><label>名称</label><input id="dns-name" value="${safeName}"></div>
+    <div class="form-group"><label>内容</label><textarea id="dns-content" style="min-height:80px">${safeContent}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>TTL</label><select id="dns-ttl"><option value="1" ${r.ttl===1?'selected':''}>自动</option><option value="60" ${r.ttl===60?'selected':''}>60 秒</option><option value="300" ${r.ttl===300?'selected':''}>5 分钟</option><option value="3600" ${r.ttl===3600?'selected':''}>1 小时</option></select></div>
+      <div class="form-group"><label>代理</label><select id="dns-proxied"><option value="true" ${r.proxied?'selected':''}>开启</option><option value="false" ${!r.proxied?'selected':''}>关闭</option></select></div>
+    </div>`;
+  showModal('编辑 DNS 记录', html, async (overlay) => {
+    try {
+      await api(`/zones/${state.currentZoneId}/dns/${recordId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          type: r.type, name: overlay.querySelector('#dns-name').value,
+          content: overlay.querySelector('#dns-content').value,
+          ttl: parseInt(overlay.querySelector('#dns-ttl').value),
+          proxied: overlay.querySelector('#dns-proxied').value === 'true',
+        }),
+      });
+      overlay.remove(); toast('DNS 记录已更新', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+function deleteDNS(recordId, name) {
+  confirmAction('删除 DNS 记录', `确定要删除记录 "${name}" 吗？`, async () => {
+    await api(`/zones/${state.currentZoneId}/dns/${recordId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+// ==================== Workers ====================
+async function renderWorkers(area) {
+  const resp = await api(`/workers/scripts?account_id=${state.accountId}`);
+  const scripts = resp.result || [];
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">Workers 脚本</h3>
+      <button class="btn btn-primary" onclick="showDeployWorker()">+ 部署 Worker</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>脚本名称</th><th>修改时间</th><th>大小</th><th>操作</th></tr></thead>
+        <tbody>
+          ${scripts.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:40px">暂无 Workers</td></tr>' :
+          scripts.map(s => `<tr>
+            <td><strong>⚡ ${s.id || s.name}</strong></td>
+            <td>${s.modified_on ? new Date(s.modified_on).toLocaleString('zh-CN') : '-'}</td>
+            <td>${s.size ? (s.size / 1024).toFixed(1) + ' KB' : '-'}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>viewWorkerContent('${s.id || s.name}'), '加载脚本中...')">查看代码</button>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteWorker('${s.id || s.name}'), '删除中...')">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function showDeployWorker() {
+  const html = `
+    <div class="form-group"><label>脚本名称</label><input id="w-name" placeholder="my-worker"></div>
+    <div class="form-group"><label>脚本代码</label><textarea id="w-code" style="min-height:200px;font-family:monospace" placeholder="export default {
+  async fetch(request) {
+    return new Response('Hello World!');
+  }
+};"></textarea></div>`;
+  showModal('部署 Worker', html, async (overlay) => {
+    try {
+      const name = overlay.querySelector('#w-name').value;
+      const code = overlay.querySelector('#w-code').value;
+      await api(`/workers/scripts/${name}?account_id=${state.accountId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ content: code, bindings: [] }),
+      });
+      overlay.remove(); toast('Worker 已部署', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  }, '部署');
+}
+
+async function viewWorkerContent(name) {
+  try {
+    const resp = await api(`/workers/scripts/${name}/content?account_id=${state.accountId}`);
+    const content = resp.result?.content || '无法获取脚本内容';
+    showModal(`Worker: ${name}`, `<pre style="background:#0d1117;padding:16px;border-radius:6px;font-size:12px;color:#c9d1d9;font-family:monospace;white-space:pre-wrap;word-break:break-all">${escapeHtml(content)}</pre>`, () => {}, '确认', 'lg');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function deleteWorker(name) {
+  confirmAction('删除 Worker', `确定要删除 Worker "${name}" 吗？此操作不可撤销。`, async () => {
+    await api(`/workers/scripts/${name}?account_id=${state.accountId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+// ==================== Pages ====================
+async function renderPages(area) {
+  const resp = await api(`/pages/projects?account_id=${state.accountId}`);
+  const projects = resp.result || [];
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">Pages 项目</h3>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>项目名称</th><th>子域名</th><th>创建时间</th><th>最新部署</th><th>操作</th></tr></thead>
+        <tbody>
+          ${projects.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px">暂无 Pages 项目</td></tr>' :
+          projects.map(p => `<tr>
+            <td><strong>📄 ${p.name}</strong></td>
+            <td><a href="https://${p.subdomain}" target="_blank">${p.subdomain || '-'}</a></td>
+            <td>${p.created_on ? new Date(p.created_on).toLocaleString('zh-CN') : '-'}</td>
+            <td>${p.latest_deployment?.url ? `<a href="${p.latest_deployment.url}" target="_blank">查看部署</a>` : '-'}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>viewPagesDeployments('${p.name}'))">部署历史</button>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deletePagesProject('${p.name}'))">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function viewPagesDeployments(projectName) {
+  try {
+    const resp = await api(`/pages/projects/${projectName}/deployments?account_id=${state.accountId}`);
+    const deployments = resp.result || [];
+    let html = `<div style="max-height:400px;overflow-y:auto"><table>
+      <thead><tr><th>部署 ID</th><th>环境</th><th>状态</th><th>创建时间</th></tr></thead>
+      <tbody>${deployments.map(d => `<tr>
+        <td style="font-family:monospace;font-size:12px">${d.id || '-'}</td>
+        <td><span class="badge badge-info">${d.environment || 'production'}</span></td>
+        <td><span class="badge ${d.deployment_trigger ? 'badge-success' : 'badge-pending'}">${d.url ? '已部署' : '进行中'}</span></td>
+        <td>${d.created_on ? new Date(d.created_on).toLocaleString('zh-CN') : '-'}</td>
+      </tr>`).join('')}</tbody></table></div>`;
+    showModal(`部署历史 — ${projectName}`, html, () => {}, '确认', 'md');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function deletePagesProject(name) {
+  confirmAction('删除 Pages 项目', `确定要删除 Pages 项目 "${name}" 吗？`, async () => {
+    await api(`/pages/projects/${name}?account_id=${state.accountId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+// ==================== R2 ====================
+async function renderR2(area) {
+  const resp = await api(`/r2/buckets?account_id=${state.accountId}`);
+  const buckets = resp.result?.buckets || [];
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">R2 对象存储</h3>
+      <button class="btn btn-primary" onclick="showCreateBucket()">+ 创建 Bucket</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Bucket 名称</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody>
+          ${buckets.length === 0 ? '<tr><td colspan="3" style="text-align:center;color:var(--text-dim);padding:40px">暂无 R2 Bucket</td></tr>' :
+          buckets.map(b => `<tr>
+            <td><strong>📦 ${b.name}</strong></td>
+            <td>${b.creation_date ? new Date(b.creation_date).toLocaleString('zh-CN') : '-'}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>browseR2Bucket('${b.name}'))">浏览文件</button>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteR2Bucket('${b.name}'))">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function showCreateBucket() {
+  showModal('创建 R2 Bucket', `
+    <div class="form-group"><label>Bucket 名称</label><input id="bucket-name" placeholder="my-bucket"></div>
+  `, async (overlay) => {
+    try {
+      await api(`/r2/buckets?account_id=${state.accountId}`, {
+        method: 'POST', body: JSON.stringify({ name: overlay.querySelector('#bucket-name').value }),
+      });
+      overlay.remove(); toast('Bucket 已创建', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+async function browseR2Bucket(bucketName) {
+  try {
+    const resp = await api(`/r2/buckets/${bucketName}/objects?account_id=${state.accountId}`);
+    const objects = resp.result?.objects || [];
+    let html = `<p style="margin-bottom:12px;color:var(--text-dim)">Bucket: <strong style="color:var(--text)">${bucketName}</strong></p>
+      <table><thead><tr><th>文件名</th><th>大小</th><th>修改时间</th><th>操作</th></tr></thead>
+      <tbody>${objects.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">Bucket 为空</td></tr>' :
+      objects.map(o => `<tr>
+        <td style="font-family:monospace;font-size:12px">${o.key}</td>
+        <td>${o.size ? (o.size / 1024).toFixed(1) + ' KB' : '-'}</td>
+        <td>${o.uploaded ? new Date(o.uploaded).toLocaleString('zh-CN') : '-'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteR2Object('${bucketName}','${o.key}'))">删除</button></td>
+      </tr>`).join('')}</tbody></table>`;
+    showModal(`浏览 Bucket — ${bucketName}`, html, () => {}, '确认', 'md');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function deleteR2Bucket(name) {
+  confirmAction('删除 R2 Bucket', `确定要删除 Bucket "${name}" 吗？这会删除其中所有文件！`, async () => {
+    await api(`/r2/buckets/${name}?account_id=${state.accountId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+async function deleteR2Object(bucket, key) {
+  try {
+    await api(`/r2/buckets/${bucket}/objects?account_id=${state.accountId}&key=${encodeURIComponent(key)}`, { method: 'DELETE' });
+    toast('文件已删除', 'success');
+    browseR2Bucket(bucket);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ==================== KV ====================
+async function renderKV(area) {
+  const resp = await api(`/kv/namespaces?account_id=${state.accountId}`);
+  const namespaces = resp.result || [];
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">KV 命名空间</h3>
+      <button class="btn btn-primary" onclick="showCreateKVNamespace()">+ 创建命名空间</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>命名空间</th><th>ID</th><th>操作</th></tr></thead>
+        <tbody>
+          ${namespaces.length === 0 ? '<tr><td colspan="3" style="text-align:center;color:var(--text-dim);padding:40px">暂无 KV 命名空间</td></tr>' :
+          namespaces.map(n => `<tr>
+            <td><strong>🔑 ${n.title}</strong></td>
+            <td><code style="background:var(--bg-input);padding:2px 8px;border-radius:4px;font-size:12px">${n.id}</code></td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>browseKVKeys('${n.id}','${n.title}'))">浏览键值</button>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteKVNamespace('${n.id}','${n.title}'))">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function showCreateKVNamespace() {
+  showModal('创建 KV 命名空间', `
+    <div class="form-group"><label>命名空间标题</label><input id="kv-title" placeholder="my-kv-store"></div>
+  `, async (overlay) => {
+    try {
+      await api(`/kv/namespaces?account_id=${state.accountId}`, {
+        method: 'POST', body: JSON.stringify({ title: overlay.querySelector('#kv-title').value }),
+      });
+      overlay.remove(); toast('KV 命名空间已创建', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+async function browseKVKeys(nsId, nsTitle) {
+  try {
+    const resp = await api(`/kv/namespaces/${nsId}/keys?account_id=${state.accountId}&limit=100`);
+    const keys = resp.result || [];
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="color:var(--text-dim)">命名空间: <strong style="color:var(--text)">${nsTitle}</strong></span>
+      <button class="btn btn-sm btn-primary" onclick="showAddKVKey('${nsId}')">+ 添加键值</button>
+    </div>
+      <table><thead><tr><th>Key</th><th>操作</th></tr></thead>
+      <tbody>${keys.length === 0 ? '<tr><td colspan="2" style="text-align:center;color:var(--text-dim);padding:20px">暂无键值</td></tr>' :
+      keys.map(k => `<tr>
+        <td style="font-family:monospace;font-size:12px">${k.name}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>viewKVValue('${nsId}','${encodeURIComponent(k.name)}'))">查看</button>
+          <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteKVKey('${nsId}','${encodeURIComponent(k.name)}'))">删除</button>
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+    showModal(`KV 键值 — ${nsTitle}`, html, () => {}, '确认', 'md');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function showAddKVKey(nsId) {
+  document.querySelector('.modal-overlay')?.remove();
+  showModal('添加 KV 键值', `
+    <div class="form-group"><label>Key</label><input id="kv-key" placeholder="my-key"></div>
+    <div class="form-group"><label>Value</label><textarea id="kv-value" placeholder="值内容"></textarea></div>
+    <div class="form-group"><label>过期时间 (可选, 秒数)</label><input id="kv-exp" type="number" placeholder="留空则不过期"></div>
+  `, async (overlay) => {
+    try {
+      await api(`/kv/namespaces/${nsId}/values?account_id=${state.accountId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          key: overlay.querySelector('#kv-key').value,
+          value: overlay.querySelector('#kv-value').value,
+          expiration: overlay.querySelector('#kv-exp').value || undefined,
+        }),
+      });
+      overlay.remove(); toast('键值已写入', 'success');
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+async function viewKVValue(nsId, encodedKey) {
+  try {
+    const resp = await api(`/kv/namespaces/${nsId}/values/${encodedKey}?account_id=${state.accountId}`);
+    const val = resp.result?.value || '(空)';
+    showModal('查看值', `<pre style="background:#0d1117;padding:16px;border-radius:6px;white-space:pre-wrap;font-size:12px;color:#c9d1d9;font-family:monospace;max-height:500px;overflow:auto;word-break:break-all">${escapeHtml(val)}</pre>`, () => {}, '确认', 'md');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function deleteKVKey(nsId, encodedKey) {
+  confirmAction('删除键值', '确定要删除这个键值对吗？', async () => {
+    await api(`/kv/namespaces/${nsId}/keys/${encodedKey}?account_id=${state.accountId}`, { method: 'DELETE' });
+    toast('键值已删除', 'success');
+  });
+}
+
+function deleteKVNamespace(nsId, title) {
+  confirmAction('删除 KV 命名空间', `确定要删除命名空间 "${title}" 吗？`, async () => {
+    await api(`/kv/namespaces/${nsId}?account_id=${state.accountId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+// ==================== D1 ====================
+async function renderD1(area) {
+  const resp = await api(`/d1/databases?account_id=${state.accountId}`);
+  const databases = resp.result || [];
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">D1 数据库</h3>
+      <button class="btn btn-primary" onclick="showCreateD1()">+ 创建数据库</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>数据库名称</th><th>ID</th><th>版本</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody>
+          ${databases.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px">暂无 D1 数据库</td></tr>' :
+          databases.map(d => `<tr>
+            <td><strong>🗃️ ${d.name}</strong></td>
+            <td><code style="background:var(--bg-input);padding:2px 8px;border-radius:4px;font-size:11px">${d.uuid}</code></td>
+            <td>${d.version || '-'}</td>
+            <td>${d.created_at ? new Date(d.created_at).toLocaleString('zh-CN') : '-'}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>openD1Console('${d.uuid}','${d.name}'))">SQL 控制台</button>
+              <button class="btn btn-sm btn-secondary" onclick="btnLoading(this, ()=>viewD1Tables('${d.uuid}','${d.name}'), '加载表结构...')">表结构</button>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteD1('${d.uuid}','${d.name}'))">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function showCreateD1() {
+  showModal('创建 D1 数据库', `
+    <div class="form-group"><label>数据库名称</label><input id="d1-name" placeholder="my-database"></div>
+  `, async (overlay) => {
+    try {
+      await api(`/d1/databases?account_id=${state.accountId}`, {
+        method: 'POST', body: JSON.stringify({ name: overlay.querySelector('#d1-name').value }),
+      });
+      overlay.remove(); toast('D1 数据库已创建', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+
+async function openD1Console(dbId, dbName) {
+  const html = `
+    <p style="margin-bottom:12px;color:var(--text-dim)">数据库: <strong style="color:var(--text)">${dbName}</strong></p>
+    <textarea class="sql-editor" id="d1-sql" placeholder="输入 SQL 语句...">SELECT * FROM sqlite_master LIMIT 10;</textarea>
+    <button class="btn btn-primary" style="margin-top:8px" onclick="executeD1SQL('${dbId}')">▶ 执行</button>
+    <div id="d1-result" class="sql-result"></div>`;
+  showModal('D1 SQL 控制台', html, () => {}, '确认', 'lg');
+}
+
+async function executeD1SQL(dbId) {
+  const sql = document.getElementById('d1-sql').value;
+  const resultDiv = document.getElementById('d1-result');
+  resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>执行中...</div>';
+  try {
+    const resp = await api(`/d1/databases/${dbId}/query?account_id=${state.accountId}`, {
+      method: 'POST', body: JSON.stringify({ sql }),
+    });
+    const rows = resp.result?.[0]?.results || resp.result || [];
+    const meta = resp.result?.[0]?.meta || {};
+    if (!Array.isArray(rows) || rows.length === 0) {
+      resultDiv.innerHTML = `<p style="color:var(--green);margin-top:12px">✓ 执行成功 (${meta.rows_read || 0} 行读取, ${meta.rows_written || 0} 行写入)</p>`;
+      return;
+    }
+    const cols = Object.keys(rows[0]);
+    resultDiv.innerHTML = `
+      <p style="color:var(--green);margin:12px 0 8px">✓ ${rows.length} 行结果 (${meta.rows_read || 0} 行读取)</p>
+      <div style="overflow-x:auto"><table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${r[c] === null ? '<span style="color:var(--text-dim)">NULL</span>' : escapeHtml(String(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  } catch (e) {
+    resultDiv.innerHTML = `<p style="color:var(--red);margin-top:12px">✗ ${e.message}</p>`;
+  }
+}
+
+async function viewD1Tables(dbId, dbName) {
+  try {
+    const resp = await api(`/d1/databases/${dbId}/tables?account_id=${state.accountId}`);
+    const tables = resp.result?.[0]?.results || [];
+    let html = `<p style="margin-bottom:12px;color:var(--text-dim)">数据库: <strong style="color:var(--text)">${dbName}</strong></p>`;
+    if (tables.length === 0) {
+      html += '<p style="color:var(--text-dim)">暂无表</p>';
+    } else {
+      html += tables.map(t => `
+        <div style="background:var(--bg-input);padding:12px;border-radius:6px;margin-bottom:8px">
+          <div style="font-weight:600;color:var(--orange);margin-bottom:4px">${t.type === 'view' ? '👁' : '📋'} ${t.name} <span style="font-weight:400;font-size:11px;color:var(--text-dim)">(${t.type})</span></div>
+          <pre style="font-size:11px;color:var(--text-dim);white-space:pre-wrap;font-family:monospace">${escapeHtml(t.sql || '')}</pre>
+        </div>`).join('');
+    }
+    showModal('表结构', html, () => {}, '确认', 'md');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function deleteD1(dbId, dbName) {
+  confirmAction('删除 D1 数据库', `确定要删除数据库 "${dbName}" 吗？`, async () => {
+    await api(`/d1/databases/${dbId}?account_id=${state.accountId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+// ==================== Databases (Hyperdrive) ====================
+async function renderDatabases(area) {
+  let hyperdriveConfigs = [];
+  try {
+    const resp = await api(`/databases/hyperdrive?account_id=${state.accountId}`);
+    hyperdriveConfigs = resp.result || [];
+  } catch {}
+
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--text-bright)">数据库管理 (Hyperdrive)</h3>
+      <button class="btn btn-primary" onclick="showCreateHyperdrive()">+ 创建配置</button>
+    </div>
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header"><h3>Hyperdrive 配置</h3></div>
+      <table>
+        <thead><tr><th>配置名称</th><th>ID</th><th>数据库类型</th><th>主机</th><th>操作</th></tr></thead>
+        <tbody>
+          ${hyperdriveConfigs.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:40px">暂无 Hyperdrive 配置<br><span style="font-size:12px">Hyperdrive 用于加速访问外部 PostgreSQL/MySQL 数据库</span></td></tr>' :
+          hyperdriveConfigs.map(c => `<tr>
+            <td><strong>🐘 ${c.name || c.id}</strong></td>
+            <td><code style="background:var(--bg-input);padding:2px 8px;border-radius:4px;font-size:11px">${c.id}</code></td>
+            <td><span class="badge badge-purple">${c.origin?.database || 'postgresql'}</span></td>
+            <td style="font-size:12px">${c.origin?.host || '-'}</td>
+            <td>
+              <button class="btn btn-sm btn-danger" onclick="btnLoading(this, ()=>deleteHyperdrive('${c.id}','${c.name || c.id}'))">删除</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>说明</h3></div>
+      <div class="card-body" style="color:var(--text-dim);font-size:13px;line-height:1.8">
+        <p>• <strong>Hyperdrive</strong> 是 Cloudflare 提供的数据库连接池和缓存服务，可大幅加速从 Worker 访问外部 PostgreSQL/MySQL 数据库。</p>
+        <p>• 支持的数据库: <span class="badge badge-info">PostgreSQL</span> <span class="badge badge-purple">MySQL</span></p>
+        <p>• 创建配置后，可以在 Worker 中通过 <code style="background:var(--bg-input);padding:2px 6px;border-radius:3px">env.HYPERDRIVE</code> 绑定使用。</p>
+        <p>• 也可以直接使用 <strong>D1</strong>（SQLite）作为 Cloudflare 原生数据库方案。</p>
+      </div>
+    </div>`;
+}
+
+function showCreateHyperdrive() {
+  showModal('创建 Hyperdrive 配置', `
+    <div class="form-group"><label>配置名称</label><input id="hd-name" placeholder="my-db-pool"></div>
+    <div class="form-group"><label>数据库类型</label>
+      <select id="hd-type"><option value="postgresql">PostgreSQL</option><option value="mysql">MySQL</option></select></div>
+    <div class="form-group"><label>主机地址</label><input id="hd-host" placeholder="db.example.com"></div>
+    <div class="form-row">
+      <div class="form-group"><label>端口</label><input id="hd-port" type="number" placeholder="5432"></div>
+      <div class="form-group"><label>数据库名</label><input id="hd-dbname" placeholder="mydb"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>用户名</label><input id="hd-user" placeholder="dbuser"></div>
+      <div class="form-group"><label>密码</label><input id="hd-pass" type="password" placeholder="••••••"></div>
+    </div>
+    <div class="form-group"><label>连接方案</label>
+      <select id="hd-scheme"><option value="0">Direct (直连)</option><option value="1">Hyperdrive (连接池优化)</option></select></div>
+  `, async (overlay) => {
+    try {
+      const dbType = overlay.querySelector('#hd-type').value;
+      const port = overlay.querySelector('#hd-port').value || (dbType === 'postgresql' ? '5432' : '3306');
+      await api(`/databases/hyperdrive?account_id=${state.accountId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: overlay.querySelector('#hd-name').value,
+          origin: {
+            host: overlay.querySelector('#hd-host').value,
+            port: parseInt(port),
+            database: overlay.querySelector('#hd-dbname').value,
+            user: overlay.querySelector('#hd-user').value,
+            password: overlay.querySelector('#hd-pass').value,
+            scheme: dbType,
+          },
+        }),
+      });
+      overlay.remove(); toast('Hyperdrive 配置已创建', 'success'); loadSectionData();
+    } catch (e) { toast(e.message, 'error'); }
+  }, '创建');
+}
+
+function deleteHyperdrive(id, name) {
+  confirmAction('删除 Hyperdrive 配置', `确定要删除配置 "${name}" 吗？`, async () => {
+    await api(`/databases/hyperdrive/${id}?account_id=${state.accountId}`, { method: 'DELETE' });
+    loadSectionData();
+  });
+}
+
+// ==================== Helpers ====================
+function escapeHtml(str) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return str.replace(/[&<>"']/g, c => map[c]);
+}
+
+// ==================== Init ====================
+(async function init() {
+  // 获取服务端配置
+  try {
+    const resp = await fetch('/api/server/config');
+    state.serverConfig = (await resp.json()).result || {};
+  } catch {}
+
+  // 如果不需要密码或密码已验证，自动登录（凭证由后端 .env 提供）
+  if (!state.serverConfig?.needPassword || state.passwordVerified) {
+    try {
+      const resp = await api('/auth/verify');
+      state.user = resp.result;
+      await loadAccounts();
+      await loadZones();
+      if (!state.currentZoneId && state.zones.length) {
+        state.currentZoneId = state.zones[0].id;
+        state.currentZoneName = state.zones[0].name;
+        localStorage.setItem('cf_zone_id', state.currentZoneId);
+        localStorage.setItem('cf_zone_name', state.currentZoneName);
+      }
+    } catch (e) {
+      console.error('Auto-login failed:', e);
+    }
+  }
+  render();
+})();
+</script>
+</body>
+</html>

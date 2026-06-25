@@ -3,5 +3,4 @@ dist/
 .wrangler/
 .dev.vars
 .vercel/
-*.html
 _check.js
