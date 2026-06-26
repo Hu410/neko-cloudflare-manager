@@ -162,13 +162,13 @@ nekocloud/
 
 ### 与 Express 版本的区别
 
-| | Express 版 | Hono 版（本项目） |
-|---|---|---|
-| 框架 | Express（仅 Node.js） | Hono（跨平台） |
-| 模块 | CommonJS | ESM |
-| 环境变量 | dotenv + process.env | 平台原生（CF env / process.env） |
-| 静态文件 | 文件系统 serve | 构建时内嵌 |
-| 依赖体积 | ~5MB | ~200KB |
+| | Hono 版（本项目） |
+|---|---|
+| 框架 | Hono（跨平台） |
+| 模块 | ESM |
+| 环境变量 | 平台原生（CF env / process.env） |
+| 静态文件 | 构建时内嵌 |
+| 依赖体积 | ~200KB |
 
 ## 🔐 安全
 
